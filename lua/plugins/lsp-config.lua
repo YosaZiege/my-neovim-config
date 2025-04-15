@@ -9,19 +9,23 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 		config = function()
 			require("mason-lspconfig").setup({
-				"ast_grep",
-				"css_variables",
-				"docker_compose_language_service",
-				"golangci_lint_ls",
-				"html-lsp",
-				"css-lsp",
-				"java_language_server",
-				"ts_ls",
-				"eslint",
-				"jsonls",
-				"lua_ls",
-				"pylsp",
-				"sqlls",
+				ensure_installed = {
+					"ast_grep",
+					"css_variables",
+					"docker_compose_language_service",
+					"golangci_lint_ls",
+					"html",
+					"cssls",
+					"tailwind.css",
+					"jdtls",
+					"ts_ls",
+					"eslint",
+					"jsonls",
+					"lua_ls",
+					"pylsp",
+					"sqlls",
+					"gopls",
+				},
 			})
 		end,
 	},
@@ -30,21 +34,27 @@ return {
 		config = function()
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			local lspconfig = require("lspconfig")
+
 			lspconfig.lua_ls.setup({
-				capabilites = capabilities,
+				capabilities = capabilities,
 			})
 			lspconfig.ts_ls.setup({
-				capabilites = capabilities,
+				capabilities = capabilities,
 			})
 			lspconfig.gopls.setup({
-				capabilites = capabilities,
+				capabilities = capabilities,
 			})
 			lspconfig.html.setup({
-				capabilites = capabilities,
+				capabilities = capabilities,
 			})
-			lspconfig.css_variables.setup({
-				capabilites = capabilities,
+			lspconfig.cssls.setup({
+				capabilities = capabilities,
 			})
+			lspconfig.tailwindcss.setup({
+				capabilities = capabilities,
+				filetypes = { "html", "css", "javascript", "javascriptreact", "typescriptreact", "svelte", "vue" },
+			})
+
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
 			vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
