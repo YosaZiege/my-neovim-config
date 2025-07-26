@@ -8,8 +8,15 @@ return {
    config = function()
       local dap = require("dap")
       local dapui = require("dapui")
-      require("dapui").setup()
-      require("dap-go").setup()
+      local dapgo = require("dap-go")
+
+      -- Setup dap-ui
+      dapui.setup()
+
+      -- Setup dap-go (uses delve under the hood)
+      dapgo.setup()
+
+      -- Automatically open and close dap-ui
       dap.listeners.before.attach.dapui_config = function()
          dapui.open()
       end
@@ -23,7 +30,18 @@ return {
          dapui.close()
       end
 
-      vim.keymap.set("n", "<Leader>dt", dap.toggle_breakpoint, {})
-      vim.keymap.set("n", "<Leader>dc", dap.continue, {})
+      -- Keybindings for common DAP actions
+      local opts = { noremap = true, silent = true }
+
+      vim.keymap.set("n", "<Leader>dt", dap.toggle_breakpoint, opts)
+      vim.keymap.set("n", "<Leader>dc", dap.continue, opts)
+      vim.keymap.set("n", "<Leader>do", dap.step_over, opts)
+      vim.keymap.set("n", "<Leader>dr", dap.restart, opts)
+      vim.keymap.set("n", "<Leader>dq", dap.terminate, opts)
+
+      -- Open dap-ui manually
+      vim.keymap.set("n", "<Leader>dus", function()
+         dapui.toggle({})
+      end, opts)
    end,
-}
+ }

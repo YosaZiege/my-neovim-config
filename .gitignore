@@ -1,2 +1,4 @@
 *.luac
 plugin/packer_compiled.lua
+node_modules/
+node_modules/
