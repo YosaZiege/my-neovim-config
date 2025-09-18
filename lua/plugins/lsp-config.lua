@@ -47,6 +47,8 @@ return {
                   usePlaceholders = true,
                   analyses = {
                      unusedparams = true,
+                     staticcheck =true,
+                     experimentalWorkspaceModule = true,
                   }
                },
             }
