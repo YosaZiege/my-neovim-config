@@ -19,7 +19,7 @@ return {
          },
 
          on_attach = function(client, bufnr)
-            if client.supports_method("textDocument/formatting") then
+            if client:supports_method("textDocument/formatting") then
                vim.keymap.set("n", "<Leader>f", function()
                   vim.lsp.buf.format({ bufnr = bufnr })
                end, { buffer = bufnr, desc = "Format file" })
