@@ -5,7 +5,7 @@ return {
       local config = require("nvim-treesitter.configs")
       config.setup({
          auto_install = true,
-         ensure_installed = { "lua", "javascript", "go" },
+         ensure_installed = { "markdown", "markdown_inline", "lua", "python", "c", "go" },
          highlight = { enable = true },
          indent = { enable = true },
       })

@@ -16,6 +16,12 @@ vim.diagnostic.config({
 })
 vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true, silent = true })  -- Normal mode
 vim.keymap.set('i', '<C-s>', '<Esc>:w<CR>a', { noremap = true, silent = true }) -- Insert mode
+
+vim.keymap.set({"n","i"}, "<C-i>", function()
+  vim.cmd("PasteImage")
+end, { desc = "Paste image from clipboard + preview" })
+vim.keymap.set("n", "<C-q>", ":wq<CR>", { desc = "Save and quit" })
+vim.keymap.set("i", "<C-q>", "<Esc>:wq<CR>", { desc = "Save and quit" })
 vim.wo.number = true
 vim.wo.relativenumber = true
 vim.api.nvim_set_keymap('n', '<leader>n', ':set number!<CR>', { noremap = true, silent = true })
@@ -26,7 +32,16 @@ vim.keymap.set("n", "<leader>yl", function()
     vim.fn.setreg("+", line) -- copy current line to system clipboard
     print("Copied to clipboard: " .. line)
 end)
+vim.api.nvim_create_autocmd({ "FocusLost", "VimLeavePre" }, {
+  callback = function()
+    local image = require("image")
+    if image and image.clear then
+      image.clear()
+    end
+  end,
+})
 
 require("vim-options")
 
 require("lazy").setup("plugins")
+
