@@ -29,13 +29,8 @@ return {
          })
       end,
    },
-   -- Remove the nvim-lspconfig plugin entirely - it's no longer needed!
-   -- LSP configuration is now built into Neovim 0.11+
    {
-      "hrsh7th/nvim-cmp", -- Assuming you have nvim-cmp installed
-      dependencies = {
-         "hrsh7th/cmp-nvim-lsp",
-      },
+      "neovim/nvim-lspconfig",
       config = function()
          local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
@@ -57,7 +52,6 @@ return {
                },
             },
          })
-
          vim.lsp.config("clangd", {
             capabilities = capabilities,
             cmd = {
@@ -82,11 +76,10 @@ return {
                      ParameterNames = true,
                      DeducedTypes = true,
                   },
-                  fallbackFlags = { "-std=c++20" },
+                  fallbackFlags = { "-std=c++20" }, -- Change to your preferred C++ standard
                },
             },
          })
-
          vim.lsp.config("ts_ls", {
             capabilities = capabilities,
             filetypes = {
@@ -100,7 +93,7 @@ return {
             settings = {
                typescript = {
                   inlayHints = {
-                     includeInlayParameterNameHints = "all",
+                     includeInlayParameterNameHints = "all", -- "none" | "literals" | "all"
                      includeInlayParameterNameHintsWhenArgumentMatchesName = true,
                      includeInlayFunctionParameterTypeHints = true,
                      includeInlayVariableTypeHints = true,
@@ -114,12 +107,12 @@ return {
                      includeAutomaticOptionalChainCompletions = true,
                   },
                   preferences = {
-                     importModuleSpecifier = "auto",
-                     quoteStyle = "auto",
-                     includePackageJsonAutoImports = "auto",
+                     importModuleSpecifier = "auto",         -- "auto" | "relative" | "non-relative"
+                     quoteStyle = "auto",                    -- "auto" | "single" | "double"
+                     includePackageJsonAutoImports = "auto", -- "auto" | "on" | "off"
                   },
                   updateImportsOnFileMove = {
-                     enabled = "always",
+                     enabled = "always", -- "prompt" | "always" | "never"
                   },
                },
                javascript = {
@@ -170,10 +163,10 @@ return {
                      experimentalWorkspaceModule = true,
                   },
                   codelenses = {
-                     generate = true,
-                     gc_details = true,
-                     tidy = true,
-                     test = true,
+                     generate = true,   -- show 'go generate' code lens
+                     gc_details = true, -- toggle GC details
+                     tidy = true,       -- show go mod tidy lens
+                     test = true,       -- run tests from lens
                   },
                   hints = {
                      assignVariableTypes = true,
@@ -215,13 +208,13 @@ return {
                   },
                   experimental = {
                      classRegex = {
-                        "tw`([^`]*)",
-                        "tw=\"([^\"]*)",
-                        "tw={\"([^\"}]*)",
-                        "tw\\.\\w+`([^`]*)",
-                        { "clsx\\(([^)]*)\\)",       "(?:'|\"|`)([^']*)(?:'|\"|`)" },
-                        { "classnames\\(([^)]*)\\)", "'([^']*)'" },
-                        { "cva\\(([^)]*)\\)",        "[\"'`]([^\"'`]*).*?[\"'`]" },
+                        "tw`([^`]*)",                                                 -- tw`...`
+                        "tw=\"([^\"]*)",                                              -- <div tw="..." />
+                        "tw={\"([^\"}]*)",                                            -- <div tw={"..."} />
+                        "tw\\.\\w+`([^`]*)",                                          -- tw.xxx`...`
+                        { "clsx\\(([^)]*)\\)",       "(?:'|\"|`)([^']*)(?:'|\"|`)" }, -- clsx(...)
+                        { "classnames\\(([^)]*)\\)", "'([^']*)'" },                   -- classnames(...)
+                        { "cva\\(([^)]*)\\)",        "[\"'`]([^\"'`]*).*?[\"'`]" },   -- cva from class-variance-authority
                      },
                   },
                   validate = true,
@@ -240,7 +233,7 @@ return {
                   format = {
                      enable = true,
                      wrapLineLength = 120,
-                     wrapAttributes = "auto",
+                     wrapAttributes = "auto", -- "auto" | "force" | "force-aligned" | "force-expand-multiline"
                      indentInnerHtml = true,
                      preserveNewLines = true,
                      maxPreserveNewLines = 2,
@@ -267,7 +260,7 @@ return {
                css = {
                   validate = true,
                   lint = {
-                     unknownAtRules = "ignore",
+                     unknownAtRules = "ignore", -- Ignore unknown @rules (useful for custom CSS)
                      duplicateProperties = "warning",
                      emptyRules = "warning",
                      importStatement = "ignore",
@@ -306,27 +299,27 @@ return {
                codeAction = {
                   disableRuleComment = {
                      enable = true,
-                     location = "separateLine",
+                     location = "separateLine", -- "separateLine" | "sameLine"
                   },
                   showDocumentation = {
                      enable = true,
                   },
                },
                codeActionOnSave = {
-                  enable = false,
-                  mode = "all",
+                  enable = false, -- Set to true to auto-fix on save
+                  mode = "all",   -- "all" | "problems"
                },
                format = true,
                nodePath = "",
-               onIgnoredFiles = "off",
-               packageManager = "npm",
+               onIgnoredFiles = "off", -- "off" | "warn"
+               packageManager = "npm", -- "npm" | "yarn" | "pnpm"
                quiet = false,
                rulesCustomizations = {},
-               run = "onType",
+               run = "onType",   -- "onSave" | "onType"
                useESLintClass = false,
-               validate = "on",
+               validate = "on",  -- "on" | "off" | "probe"
                workingDirectory = {
-                  mode = "auto",
+                  mode = "auto", -- "auto" | "location"
                },
             },
          })
@@ -365,11 +358,9 @@ return {
             "jsonls",
             "pylsp",
             "sqlls",
-            "jdtls",
-            "clangd"
+            "jdtls"
          })
 
-         -- LSP Keymaps
          vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP Hover" })
          vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
          vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { desc = "Go to Declaration" })
@@ -382,7 +373,7 @@ return {
             vim.lsp.buf.format({ async = true })
          end, { desc = "Format Document" })
 
-         -- Inlay hints toggle
+         -- Inlay hints toggle (for TypeScript/C++)
          vim.keymap.set("n", "<leader>ih", function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
          end, { desc = "Toggle Inlay Hints" })
