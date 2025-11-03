@@ -1,382 +1,415 @@
 return {
-   {
-      "williamboman/mason.nvim",
-      config = function()
-         require("mason").setup()
-      end,
-   },
-   { "b0o/schemastore.nvim" },
-   {
-      "williamboman/mason-lspconfig.nvim",
-      config = function()
-         require("mason-lspconfig").setup({
-            ensure_installed = {
-               "ast_grep",
-               "css_variables",
-               "html",
-               "tailwindcss",
-               "cssls",
-               "jdtls",
-               "ts_ls",
-               "eslint",
-               "clangd",
-               "jsonls",
-               "lua_ls",
-               "pylsp",
-               "sqlls",
-               "gopls",
-            },
-         })
-      end,
-   },
-   {
-      "neovim/nvim-lspconfig",
-      config = function()
-         local capabilities = require("cmp_nvim_lsp").default_capabilities()
+	{
+		"williamboman/mason.nvim",
+		config = function()
+			require("mason").setup()
+		end,
+	},
+	{ "b0o/schemastore.nvim" },
+	{
+		"williamboman/mason-lspconfig.nvim",
+		config = function()
+			require("mason").setup()
+			require("mason-lspconfig").setup({
+				ensure_installed = { "lua_ls", "gopls", "clangd", "ts_ls" },
+			})
+		end,
+	},
+	{
+		"neovim/nvim-lspconfig",
+		config = function()
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+			local util = require("lspconfig.util")
 
-         -- Configure each LSP server
-         vim.lsp.config("lua_ls", {
-            capabilities = capabilities,
-            settings = {
-               Lua = {
-                  diagnostics = {
-                     globals = { "vim" },
-                  },
-                  workspace = {
-                     library = vim.api.nvim_get_runtime_file("", true),
-                     checkThirdParty = false,
-                  },
-                  telemetry = {
-                     enable = false,
-                  },
-               },
-            },
-         })
-         vim.lsp.config("clangd", {
-            capabilities = capabilities,
-            cmd = {
-               "clangd",
-               "--background-index",
-               "--clang-tidy",
-               "--header-insertion=iwyu",
-               "--completion-style=detailed",
-               "--function-arg-placeholders",
-               "--fallback-style=llvm",
-            },
-            init_options = {
-               usePlaceholders = true,
-               completeUnimported = true,
-               clangdFileStatus = true,
-            },
-            settings = {
-               clangd = {
-                  InlayHints = {
-                     Designators = true,
-                     Enabled = true,
-                     ParameterNames = true,
-                     DeducedTypes = true,
-                  },
-                  fallbackFlags = { "-std=c++20" }, -- Change to your preferred C++ standard
-               },
-            },
-         })
-         vim.lsp.config("ts_ls", {
-            capabilities = capabilities,
-            filetypes = {
-               "javascript",
-               "javascriptreact",
-               "javascript.jsx",
-               "typescript",
-               "typescriptreact",
-               "typescript.tsx",
-            },
-            settings = {
-               typescript = {
-                  inlayHints = {
-                     includeInlayParameterNameHints = "all", -- "none" | "literals" | "all"
-                     includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-                     includeInlayFunctionParameterTypeHints = true,
-                     includeInlayVariableTypeHints = true,
-                     includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-                     includeInlayPropertyDeclarationTypeHints = true,
-                     includeInlayFunctionLikeReturnTypeHints = true,
-                     includeInlayEnumMemberValueHints = true,
-                  },
-                  suggest = {
-                     includeCompletionsForModuleExports = true,
-                     includeAutomaticOptionalChainCompletions = true,
-                  },
-                  preferences = {
-                     importModuleSpecifier = "auto",         -- "auto" | "relative" | "non-relative"
-                     quoteStyle = "auto",                    -- "auto" | "single" | "double"
-                     includePackageJsonAutoImports = "auto", -- "auto" | "on" | "off"
-                  },
-                  updateImportsOnFileMove = {
-                     enabled = "always", -- "prompt" | "always" | "never"
-                  },
-               },
-               javascript = {
-                  inlayHints = {
-                     includeInlayParameterNameHints = "all",
-                     includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-                     includeInlayFunctionParameterTypeHints = true,
-                     includeInlayVariableTypeHints = true,
-                     includeInlayPropertyDeclarationTypeHints = true,
-                     includeInlayFunctionLikeReturnTypeHints = true,
-                     includeInlayEnumMemberValueHints = true,
-                  },
-                  suggest = {
-                     includeCompletionsForModuleExports = true,
-                     includeAutomaticOptionalChainCompletions = true,
-                  },
-                  preferences = {
-                     importModuleSpecifier = "auto",
-                     quoteStyle = "auto",
-                  },
-                  updateImportsOnFileMove = {
-                     enabled = "always",
-                  },
-               },
-               completions = {
-                  completeFunctionCalls = true,
-               },
-            },
-            flags = {
-               debounce_text_changes = 150,
-            },
-         })
+			vim.lsp.config("lua_ls", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern(
+						".luarc.json",
+						".luarc.jsonc",
+						".luacheckrc",
+						".stylua.toml",
+						"stylua.toml",
+						"selene.toml",
+						"selene.yml",
+						".git"
+					)(fname)
+				end,
+				settings = {
+					Lua = {
+						diagnostics = {
+							globals = { "vim" },
+						},
+						workspace = {
+							library = vim.api.nvim_get_runtime_file("", true),
+							checkThirdParty = false,
+						},
+						telemetry = {
+							enable = false,
+						},
+					},
+				},
+			})
 
-         vim.lsp.config("gopls", {
-            capabilities = capabilities,
-            settings = {
-               gopls = {
-                  completeUnimported = true,
-                  usePlaceholders = true,
-                  staticcheck = true,
-                  gofumpt = true,
-                  analyses = {
-                     unusedparams = true,
-                     nilness = true,
-                     shadow = true,
-                     unusedwrite = true,
-                     useany = true,
-                     experimentalWorkspaceModule = true,
-                  },
-                  codelenses = {
-                     generate = true,   -- show 'go generate' code lens
-                     gc_details = true, -- toggle GC details
-                     tidy = true,       -- show go mod tidy lens
-                     test = true,       -- run tests from lens
-                  },
-                  hints = {
-                     assignVariableTypes = true,
-                     compositeLiteralFields = true,
-                     compositeLiteralTypes = true,
-                     constantValues = true,
-                     functionTypeParameters = true,
-                     parameterNames = true,
-                     rangeVariableTypes = true,
-                  },
-               },
-            }
-         })
+			vim.lsp.config("clangd", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern(
+						".clangd",
+						".clang-tidy",
+						".clang-format",
+						"compile_commands.json",
+						"compile_flags.txt",
+						"configure.ac",
+						".git"
+					)(fname)
+				end,
+				cmd = {
+					"clangd",
+					"--background-index",
+					"--clang-tidy",
+					"--header-insertion=iwyu",
+					"--completion-style=detailed",
+					"--function-arg-placeholders",
+					"--fallback-style=llvm",
+				},
+				init_options = {
+					usePlaceholders = true,
+					completeUnimported = true,
+					clangdFileStatus = true,
+				},
+				settings = {
+					clangd = {
+						InlayHints = {
+							Designators = true,
+							Enabled = true,
+							ParameterNames = true,
+							DeducedTypes = true,
+						},
+						fallbackFlags = { "-std=c++20" },
+					},
+				},
+			})
 
-         vim.lsp.config("tailwindcss", {
-            capabilities = capabilities,
-            filetypes = {
-               "html",
-               "css",
-               "scss",
-               "javascript",
-               "javascriptreact",
-               "typescript",
-               "typescriptreact",
-               "vue",
-               "svelte",
-            },
-            settings = {
-               tailwindCSS = {
-                  classAttributes = { "class", "className", "classList", "ngClass" },
-                  lint = {
-                     cssConflict = "warning",
-                     invalidApply = "error",
-                     invalidConfigPath = "error",
-                     invalidScreen = "error",
-                     invalidTailwindDirective = "error",
-                     invalidVariant = "error",
-                     recommendedVariantOrder = "warning",
-                  },
-                  experimental = {
-                     classRegex = {
-                        "tw`([^`]*)",                                                 -- tw`...`
-                        "tw=\"([^\"]*)",                                              -- <div tw="..." />
-                        "tw={\"([^\"}]*)",                                            -- <div tw={"..."} />
-                        "tw\\.\\w+`([^`]*)",                                          -- tw.xxx`...`
-                        { "clsx\\(([^)]*)\\)",       "(?:'|\"|`)([^']*)(?:'|\"|`)" }, -- clsx(...)
-                        { "classnames\\(([^)]*)\\)", "'([^']*)'" },                   -- classnames(...)
-                        { "cva\\(([^)]*)\\)",        "[\"'`]([^\"'`]*).*?[\"'`]" },   -- cva from class-variance-authority
-                     },
-                  },
-                  validate = true,
-                  showPixelEquivalents = true,
-                  rootFontSize = 16,
-                  colorDecorators = true,
-               },
-            },
-         })
+			vim.lsp.config("ts_ls", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname)
+				end,
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"javascript.jsx",
+					"typescript",
+					"typescriptreact",
+					"typescript.tsx",
+				},
+				settings = {
+					typescript = {
+						inlayHints = {
+							includeInlayParameterNameHints = "all",
+							includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+							includeInlayFunctionParameterTypeHints = true,
+							includeInlayVariableTypeHints = true,
+							includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+							includeInlayPropertyDeclarationTypeHints = true,
+							includeInlayFunctionLikeReturnTypeHints = true,
+							includeInlayEnumMemberValueHints = true,
+						},
+						suggest = {
+							includeCompletionsForModuleExports = true,
+							includeAutomaticOptionalChainCompletions = true,
+						},
+						preferences = {
+							importModuleSpecifier = "auto",
+							quoteStyle = "auto",
+							includePackageJsonAutoImports = "auto",
+						},
+						updateImportsOnFileMove = {
+							enabled = "always",
+						},
+					},
+					javascript = {
+						inlayHints = {
+							includeInlayParameterNameHints = "all",
+							includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+							includeInlayFunctionParameterTypeHints = true,
+							includeInlayVariableTypeHints = true,
+							includeInlayPropertyDeclarationTypeHints = true,
+							includeInlayFunctionLikeReturnTypeHints = true,
+							includeInlayEnumMemberValueHints = true,
+						},
+						suggest = {
+							includeCompletionsForModuleExports = true,
+							includeAutomaticOptionalChainCompletions = true,
+						},
+						preferences = {
+							importModuleSpecifier = "auto",
+							quoteStyle = "auto",
+						},
+						updateImportsOnFileMove = {
+							enabled = "always",
+						},
+					},
+					completions = {
+						completeFunctionCalls = true,
+					},
+				},
+				flags = {
+					debounce_text_changes = 150,
+				},
+			})
 
-         vim.lsp.config("html", {
-            capabilities = capabilities,
-            filetypes = { "html", "htmldjango" },
-            settings = {
-               html = {
-                  format = {
-                     enable = true,
-                     wrapLineLength = 120,
-                     wrapAttributes = "auto", -- "auto" | "force" | "force-aligned" | "force-expand-multiline"
-                     indentInnerHtml = true,
-                     preserveNewLines = true,
-                     maxPreserveNewLines = 2,
-                  },
-                  hover = {
-                     documentation = true,
-                     references = true,
-                  },
-                  autoClosingTags = true,
-                  suggest = {
-                     html5 = true,
-                  },
-                  validate = {
-                     scripts = true,
-                     styles = true,
-                  },
-               },
-            },
-         })
+			vim.lsp.config("gopls", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern("go.mod", ".git")(fname)
+				end,
+				settings = {
+					gopls = {
+						completeUnimported = true,
+						usePlaceholders = true,
+						staticcheck = true,
+						gofumpt = true,
+						analyses = {
+							unusedparams = true,
+							nilness = true,
+							shadow = true,
+							unusedwrite = true,
+							useany = true,
+							experimentalWorkspaceModule = true,
+						},
+						codelenses = {
+							generate = true,
+							gc_details = true,
+							tidy = true,
+							test = true,
+						},
+						hints = {
+							assignVariableTypes = true,
+							compositeLiteralFields = true,
+							compositeLiteralTypes = true,
+							constantValues = true,
+							functionTypeParameters = true,
+							parameterNames = true,
+							rangeVariableTypes = true,
+						},
+					},
+				},
+			})
 
-         vim.lsp.config("cssls", {
-            capabilities = capabilities,
-            settings = {
-               css = {
-                  validate = true,
-                  lint = {
-                     unknownAtRules = "ignore", -- Ignore unknown @rules (useful for custom CSS)
-                     duplicateProperties = "warning",
-                     emptyRules = "warning",
-                     importStatement = "ignore",
-                     float = "ignore",
-                     fontFaceProperties = "warning",
-                  },
-                  completion = {
-                     triggerPropertyValueCompletion = true,
-                     completePropertyWithSemicolon = true,
-                  },
-                  hover = {
-                     documentation = true,
-                     references = true,
-                  },
-               },
-               scss = {
-                  validate = true,
-                  lint = {
-                     unknownAtRules = "ignore",
-                     duplicateProperties = "warning",
-                  },
-               },
-               less = {
-                  validate = true,
-                  lint = {
-                     unknownAtRules = "ignore",
-                     duplicateProperties = "warning",
-                  },
-               },
-            },
-         })
+			vim.lsp.config("tailwindcss", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern(
+						"tailwind.config.js",
+						"tailwind.config.cjs",
+						"tailwind.config.mjs",
+						"tailwind.config.ts",
+						"postcss.config.js",
+						"postcss.config.cjs",
+						"postcss.config.mjs",
+						"postcss.config.ts",
+						"package.json",
+						".git"
+					)(fname)
+				end,
+				filetypes = {
+					"html",
+					"css",
+					"scss",
+					"javascript",
+					"javascriptreact",
+					"typescript",
+					"typescriptreact",
+					"vue",
+					"svelte",
+				},
+				settings = {
+					tailwindCSS = {
+						classAttributes = { "class", "className", "classList", "ngClass" },
+						lint = {
+							cssConflict = "warning",
+							invalidApply = "error",
+							invalidConfigPath = "error",
+							invalidScreen = "error",
+							invalidTailwindDirective = "error",
+							invalidVariant = "error",
+							recommendedVariantOrder = "warning",
+						},
+						experimental = {
+							classRegex = {
+								"tw`([^`]*)",
+								'tw="([^"]*)',
+								'tw={"([^"}]*)',
+								"tw\\.\\w+`([^`]*)",
+								{ "clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)" },
+								{ "classnames\\(([^)]*)\\)", "'([^']*)'" },
+								{ "cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]" },
+							},
+						},
+						validate = true,
+						showPixelEquivalents = true,
+						rootFontSize = 16,
+						colorDecorators = true,
+					},
+				},
+			})
 
-         vim.lsp.config("eslint", {
-            capabilities = capabilities,
-            settings = {
-               codeAction = {
-                  disableRuleComment = {
-                     enable = true,
-                     location = "separateLine", -- "separateLine" | "sameLine"
-                  },
-                  showDocumentation = {
-                     enable = true,
-                  },
-               },
-               codeActionOnSave = {
-                  enable = false, -- Set to true to auto-fix on save
-                  mode = "all",   -- "all" | "problems"
-               },
-               format = true,
-               nodePath = "",
-               onIgnoredFiles = "off", -- "off" | "warn"
-               packageManager = "npm", -- "npm" | "yarn" | "pnpm"
-               quiet = false,
-               rulesCustomizations = {},
-               run = "onType",   -- "onSave" | "onType"
-               useESLintClass = false,
-               validate = "on",  -- "on" | "off" | "probe"
-               workingDirectory = {
-                  mode = "auto", -- "auto" | "location"
-               },
-            },
-         })
+			vim.lsp.config("html", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern("package.json", ".git")(fname) or vim.fn.getcwd()
+				end,
+				filetypes = { "html", "htmldjango" },
+				settings = {
+					html = {
+						format = {
+							enable = true,
+							wrapLineLength = 120,
+							wrapAttributes = "auto",
+							indentInnerHtml = true,
+							preserveNewLines = true,
+							maxPreserveNewLines = 2,
+						},
+						hover = {
+							documentation = true,
+							references = true,
+						},
+						autoClosingTags = true,
+						suggest = {
+							html5 = true,
+						},
+						validate = {
+							scripts = true,
+							styles = true,
+						},
+					},
+				},
+			})
 
-         vim.lsp.config("jsonls", {
-            capabilities = capabilities,
-            settings = {
-               json = {
-                  schemas = require("schemastore").json.schemas(),
-                  validate = { enable = true },
-               },
-            },
-         })
+			vim.lsp.config("cssls", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern("package.json", ".git")(fname) or vim.fn.getcwd()
+				end,
+				settings = {
+					css = {
+						validate = true,
+						lint = {
+							unknownAtRules = "ignore",
+							duplicateProperties = "warning",
+							emptyRules = "warning",
+							importStatement = "ignore",
+							float = "ignore",
+							fontFaceProperties = "warning",
+						},
+						completion = {
+							triggerPropertyValueCompletion = true,
+							completePropertyWithSemicolon = true,
+						},
+						hover = {
+							documentation = true,
+							references = true,
+						},
+					},
+					scss = {
+						validate = true,
+						lint = {
+							unknownAtRules = "ignore",
+							duplicateProperties = "warning",
+						},
+					},
+					less = {
+						validate = true,
+						lint = {
+							unknownAtRules = "ignore",
+							duplicateProperties = "warning",
+						},
+					},
+				},
+			})
 
-         vim.lsp.config("pylsp", {
-            capabilities = capabilities,
-         })
+			vim.lsp.config("eslint", {
+				capabilities = capabilities,
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"javascript.jsx",
+					"typescript",
+					"typescriptreact",
+					"typescript.tsx",
+					"vue",
+					"svelte",
+				},
+				root_dir = function(fname)
+					return util.root_pattern(
+						".eslintrc",
+						".eslintrc.js",
+						".eslintrc.cjs",
+						".eslintrc.yaml",
+						".eslintrc.yml",
+						".eslintrc.json",
+						"eslint.config.js",
+						"eslint.config.mjs",
+						"eslint.config.cjs",
+						"package.json"
+					)(fname) or util.find_git_ancestor(fname)
+				end,
+				settings = {
+					codeAction = {
+						disableRuleComment = {
+							enable = true,
+							location = "separateLine",
+						},
+						showDocumentation = {
+							enable = true,
+						},
+					},
+					codeActionOnSave = {
+						enable = false,
+						mode = "all",
+					},
+					format = true,
+					nodePath = "",
+					onIgnoredFiles = "off",
+					packageManager = "npm",
+					quiet = false,
+					rulesCustomizations = {},
+					run = "onType",
+					useESLintClass = false,
+					validate = "on",
+					workingDirectory = {
+						mode = "auto",
+					},
+				},
+			})
 
-         vim.lsp.config("sqlls", {
-            capabilities = capabilities,
-         })
+			vim.lsp.config("jsonls", {
+				capabilities = capabilities,
+				root_dir = function(fname)
+					return util.root_pattern(".git")(fname) or vim.fn.getcwd()
+				end,
+				settings = {
+					json = {
+						schemas = require("schemastore").json.schemas(),
+						validate = { enable = true },
+					},
+				},
+			})
 
-         vim.lsp.config("jdtls", {
-            capabilities = capabilities,
-         })
-
-         -- Enable all configured LSP servers
-         vim.lsp.enable({
-            "lua_ls",
-            "ts_ls",
-            "gopls",
-            "tailwindcss",
-            "html",
-            "cssls",
-            "eslint",
-            "jsonls",
-            "pylsp",
-            "sqlls",
-            "jdtls"
-         })
-
-         vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP Hover" })
-         vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
-         vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { desc = "Go to Declaration" })
-         vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
-         vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Show References" })
-         vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
-         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
-         vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
-         vim.keymap.set("n", "<leader>f", function()
-            vim.lsp.buf.format({ async = true })
-         end, { desc = "Format Document" })
-
-         -- Inlay hints toggle (for TypeScript/C++)
-         vim.keymap.set("n", "<leader>ih", function()
-            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-         end, { desc = "Toggle Inlay Hints" })
-      end,
-   },
+			-- Keymaps
+			vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP Hover" })
+			vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+			vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { desc = "Go to Declaration" })
+			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
+			vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Show References" })
+			vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
+			vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
+			vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
+			vim.keymap.set("n", "<leader>f", function()
+				vim.lsp.buf.format({ async = true })
+			end, { desc = "Format Document" })
+		end,
+	},
 }
