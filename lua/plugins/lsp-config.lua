@@ -23,8 +23,8 @@ return {
 
 			vim.lsp.config("lua_ls", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern(
+				root_dir = function(bufnr, on_dir)
+					on_dir(vim.fs.root(bufnr, {
 						".luarc.json",
 						".luarc.jsonc",
 						".luacheckrc",
@@ -32,8 +32,8 @@ return {
 						"stylua.toml",
 						"selene.toml",
 						"selene.yml",
-						".git"
-					)(fname)
+						".git",
+					}))
 				end,
 				settings = {
 					Lua = {
@@ -53,16 +53,16 @@ return {
 
 			vim.lsp.config("clangd", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern(
+				root_dir = function(bufnr, on_dir)
+					on_dir(vim.fs.root(bufnr, {
 						".clangd",
 						".clang-tidy",
 						".clang-format",
 						"compile_commands.json",
 						"compile_flags.txt",
 						"configure.ac",
-						".git"
-					)(fname)
+						".git",
+					}))
 				end,
 				cmd = {
 					"clangd",
@@ -93,8 +93,8 @@ return {
 
 			vim.lsp.config("ts_ls", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname)
+				root_dir = function(bufnr, on_dir)
+					on_dir(vim.fs.root(bufnr, { "package.json", "tsconfig.json", "jsconfig.json", ".git" }))
 				end,
 				filetypes = {
 					"javascript",
@@ -162,8 +162,8 @@ return {
 
 			vim.lsp.config("gopls", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern("go.mod", ".git")(fname)
+				root_dir = function(bufnr, on_dir)
+					on_dir(vim.fs.root(bufnr, { "go.mod", ".git" }))
 				end,
 				settings = {
 					gopls = {
@@ -200,8 +200,8 @@ return {
 
 			vim.lsp.config("tailwindcss", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern(
+				root_dir = function(bufnr, on_dir)
+					on_dir(vim.fs.root(bufnr, {
 						"tailwind.config.js",
 						"tailwind.config.cjs",
 						"tailwind.config.mjs",
@@ -211,8 +211,8 @@ return {
 						"postcss.config.mjs",
 						"postcss.config.ts",
 						"package.json",
-						".git"
-					)(fname)
+						".git",
+					}))
 				end,
 				filetypes = {
 					"html",
@@ -258,8 +258,13 @@ return {
 
 			vim.lsp.config("html", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern("package.json", ".git")(fname) or vim.fn.getcwd()
+				root_dir = function(bufnr, on_dir)
+					local root = vim.fs.root(bufnr, { "package.json", ".git" })
+					if root then
+						on_dir(root)
+					else
+						on_dir(vim.fn.getcwd())
+					end
 				end,
 				filetypes = { "html", "htmldjango" },
 				settings = {
@@ -290,8 +295,13 @@ return {
 
 			vim.lsp.config("cssls", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern("package.json", ".git")(fname) or vim.fn.getcwd()
+				root_dir = function(bufnr, on_dir)
+					local root = vim.fs.root(bufnr, { "package.json", ".git" })
+					if root then
+						on_dir(root)
+					else
+						on_dir(vim.fn.getcwd())
+					end
 				end,
 				settings = {
 					css = {
@@ -342,8 +352,8 @@ return {
 					"vue",
 					"svelte",
 				},
-				root_dir = function(fname)
-					return util.root_pattern(
+				root_dir = function(bufnr, on_dir)
+					local root = vim.fs.root(bufnr, {
 						".eslintrc",
 						".eslintrc.js",
 						".eslintrc.cjs",
@@ -353,8 +363,16 @@ return {
 						"eslint.config.js",
 						"eslint.config.mjs",
 						"eslint.config.cjs",
-						"package.json"
-					)(fname) or util.find_git_ancestor(fname)
+						"package.json",
+					})
+					if root then
+						on_dir(root)
+					else
+						local git_root = util.find_git_ancestor(vim.api.nvim_buf_get_name(bufnr))
+						if git_root then
+							on_dir(git_root)
+						end
+					end
 				end,
 				settings = {
 					codeAction = {
@@ -387,8 +405,13 @@ return {
 
 			vim.lsp.config("jsonls", {
 				capabilities = capabilities,
-				root_dir = function(fname)
-					return util.root_pattern(".git")(fname) or vim.fn.getcwd()
+				root_dir = function(bufnr, on_dir)
+					local root = vim.fs.root(bufnr, { ".git" })
+					if root then
+						on_dir(root)
+					else
+						on_dir(vim.fn.getcwd())
+					end
 				end,
 				settings = {
 					json = {
