@@ -14,34 +14,63 @@ vim.opt.conceallevel = 2
 vim.diagnostic.config({
    update_in_insert = true,
 })
-vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true, silent = true })  -- Normal mode
-vim.keymap.set('i', '<C-s>', '<Esc>:w<CR>a', { noremap = true, silent = true }) -- Insert mode
+vim.keymap.set("n", "<C-s>", ":w<CR>", { noremap = true, silent = true })       -- Normal mode
+vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>a", { noremap = true, silent = true }) -- Insert mode
 
-vim.keymap.set({"n","i"}, "<C-i>", function()
-  vim.cmd("PasteImage")
+vim.keymap.set({ "n", "i" }, "<C-i>", function()
+   vim.cmd("PasteImage")
 end, { desc = "Paste image from clipboard + preview" })
 vim.keymap.set("n", "<C-q>", ":wq<CR>", { desc = "Save and quit" })
 vim.keymap.set("i", "<C-q>", "<Esc>:wq<CR>", { desc = "Save and quit" })
 vim.wo.number = true
 vim.wo.relativenumber = true
-vim.api.nvim_set_keymap('n', '<leader>n', ':set number!<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>n", ":set number!<CR>", { noremap = true, silent = true })
 vim.cmd([[highlight CursorLineNr guifg=#FF5F87]])
 vim.wo.cursorline = true
+vim.keymap.set("i", "jj", "<Esc>", { noremap = false })
+vim.keymap.set("i", ";;1", "# ", { desc = "Markdown H1" })
+vim.keymap.set("i", ";;2", "## ", { desc = "Markdown H2" })
+vim.keymap.set("i", ";;3", "### ", { desc = "Markdown H4" })
+vim.keymap.set("i", ";;4", "#### ", { desc = "Markdown H4" })
+local modes = { "n", "i", "v", "c" }
+for _, mode in ipairs(modes) do
+   vim.keymap.set(mode, "<Up>", "<Nop>")
+   vim.keymap.set(mode, "<Down>", "<Nop>")
+   vim.keymap.set(mode, "<Left>", "<Nop>")
+   vim.keymap.set(mode, "<Right>", "<Nop>")
+end
+vim.keymap.set(
+   "i",
+   ";cpp",
+   [[
+     ```cpp
+
+     ```
+   ]]
+)
+vim.keymap.set(
+   "i",
+   ";;cpp",
+   [[int main (int argc, char *argv[]) {
+
+   return 0;
+} ]],
+   { desc = "Markdown H4" }
+)
+
 vim.keymap.set("n", "<leader>yl", function()
-    local line = vim.api.nvim_get_current_line()
-    vim.fn.setreg("+", line) -- copy current line to system clipboard
-    print("Copied to clipboard: " .. line)
+   local line = vim.api.nvim_get_current_line()
+   vim.fn.setreg("+", line)
+   print("Copied to clipboard: " .. line)
 end)
 vim.api.nvim_create_autocmd({ "FocusLost", "VimLeavePre" }, {
-  callback = function()
-    local image = require("image")
-    if image and image.clear then
-      image.clear()
-    end
-  end,
+   callback = function()
+      local image = require("image")
+      if image and image.clear then
+         image.clear()
+      end
+   end,
 })
-
 require("vim-options")
 
 require("lazy").setup("plugins")
-
